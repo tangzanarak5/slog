@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Hello from '@/components/Hello'
+import Feeds from '@/components/Feeds'
+import AddPost from '@/components/AddPost'
+import Comments from '@/components/Comments'
 
 Vue.use(Router)
 
@@ -8,8 +10,19 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'Hello',
-      component: Hello
+      name: 'Feeds',
+      component: Feeds
+    },
+    {
+      path: '/addpost',
+      name: 'AddPost',
+      component: AddPost
+    },
+    {
+      path: '/comments/:id',
+      name: 'Comments',
+      props: true,
+      component: Comments
     }
   ]
 })

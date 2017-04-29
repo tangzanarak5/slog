@@ -13,6 +13,8 @@
     <div v-else>
       <button type="button" name="button" class="button is-primary is-loading">login</button>
     </div>
+    <router-view :posts="post" :addPost="addPost" :profile="profile"></router-view>
+    <router-link to="/addpost" >addpost</router-link>
   </div>
 </template>
 
@@ -27,8 +29,10 @@ var config = {
   messagingSenderId: '203904123343'
 }
 firebase.initializeApp(config)
+var Post = firebase.database().ref('post')
+var storage = firebase.storage().ref('photoPost')
 var provider = new firebase.auth.FacebookAuthProvider()
-import Hello from './components/Hello'
+import AddPost from './components/AddPost'
 export default {
   name: 'app',
   data () {
@@ -38,10 +42,33 @@ export default {
       profile: {},
       ready: false,
       authorized: false,
-      todos: []
+      todos: [],
+      post: []
     }
   },
+  mounted () {
+    let vm = this
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        vm.authorized = true
+        vm.profile = user
+      }
+      vm.ready = true
+    })
+    Post.on('child_added', function (snapshot) {
+      var itemSlog = snapshot.val()
+      itemSlog.id = snapshot.key
+      vm.post.push(itemSlog)
+    })
+  },
   methods: {
+    addPost (newPost, file) {
+      storage.child(file.name).put(file).then(function (snapshot) {
+        newPost.photoShose = snapshot.downloadURL
+        Post.push(newPost)
+        console.log('success')
+      })
+    },
     login () {
       firebase.auth().signInWithRedirect(provider)
     },
@@ -55,17 +82,7 @@ export default {
     }
   },
   components: {
-    Hello
-  },
-  mounted () {
-    let vm = this
-    firebase.auth().onAuthStateChanged(function (user) {
-      if (user) {
-        vm.authorized = true
-        vm.profile = user
-      }
-      vm.ready = true
-    })
+    AddPost
   }
 }
 </script>
